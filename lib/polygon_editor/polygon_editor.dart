@@ -48,14 +48,23 @@ import 'polygon_editor_style.dart';
 /// }
 /// ```
 class PolygonEditor extends StatefulWidget {
+  static const String _kGestureConflictMsg =
+      'Mutually exclusive callbacks: `onMarkerTap` and `onMarkerLongPress` '
+      'cannot be used together. Leave one of them null.';
+
   const PolygonEditor({
     required this.controller,
     this.pointBuilder,
     this.midpointBuilder,
     this.style = const PolygonEditorStyle(),
     this.throttleDuration = const Duration(milliseconds: 16),
+    this.onMarkerLongPress,
+    this.onMarkerPress,
     super.key,
-  });
+  }) : assert(
+          !(onMarkerPress != null && onMarkerLongPress != null),
+          _kGestureConflictMsg,
+        );
 
   /// The controller that manages the polygon/polyline data and editing operations.
   final PolygonEditorController controller;
@@ -64,13 +73,13 @@ class PolygonEditor extends StatefulWidget {
   ///
   /// The builder receives the context, position, and drag state of the marker.
   final Widget Function(BuildContext context, LatLng position, bool isDragging)?
-  pointBuilder;
+      pointBuilder;
 
   /// Custom builder for midpoint markers. If null, uses [defaultMidpointBuilder].
   ///
   /// The builder receives the context, position, and drag state of the marker.
   final Widget Function(BuildContext context, LatLng position, bool isDragging)?
-  midpointBuilder;
+      midpointBuilder;
 
   /// The visual styling configuration for the polygon/polyline.
   final PolygonEditorStyle style;
@@ -78,6 +87,22 @@ class PolygonEditor extends StatefulWidget {
   /// Throttling duration for midpoint drag updates. Defaults to 16ms.
   /// Set to [Duration.zero] to disable throttling.
   final Duration throttleDuration;
+
+  /// Callback fired when a map marker is long-pressed.
+  ///
+  /// Receives the geographic position of the marker as a [LatLng].
+  /// If `null`, long-presses on markers are ignored.
+  ///
+  /// Receives tapped marker index
+  final void Function(LatLng, int)? onMarkerLongPress;
+
+  /// Callback fired when a map marker is pressed.
+  ///
+  /// Receives the geographic position of the marker as a [LatLng].
+  /// If `null`, presses on markers are ignored.
+  ///
+  /// Receives tapped marker index
+  final void Function(LatLng, int)? onMarkerPress;
 
   @override
   State<PolygonEditor> createState() => _PolygonEditorState();
@@ -305,7 +330,24 @@ class _PolygonEditorState extends State<PolygonEditor> {
       point: point,
       size: widget.style.pointSize,
       onLongPress: (latLng) {
-        widget.controller.removePoint(index);
+        if (widget.onMarkerPress != null) {
+          return;
+        }
+
+        if (widget.onMarkerLongPress == null) {
+          throw Exception("Need to set onMarkerLongPress function");
+        }
+        widget.onMarkerLongPress!(latLng, index);
+      },
+      onTap: (latLng) {
+        if (widget.onMarkerLongPress != null) {
+          return;
+        }
+
+        if (widget.onMarkerPress == null) {
+          throw Exception("Need to set onMarkerPress function");
+        }
+        widget.onMarkerPress!(latLng, index);
       },
       onDragStart: (details, _) {
         _showMidpoints.value = false;

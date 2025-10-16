@@ -29,8 +29,9 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
             options: MapOptions(
               initialCenter: const LatLng(51.5074, -0.1278), // London
               initialZoom: 10,
-              interactionOptions: InteractionOptions(flags: InteractiveFlag.all),
-              onLongPress: (tapPosition, point) {
+              interactionOptions:
+                  InteractionOptions(flags: InteractiveFlag.all),
+              onTap: (tapPosition, point) {
                 _controller.addPoint(point);
               },
             ),
@@ -39,7 +40,12 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.example.flutter_map_polygon_editor',
               ),
-              PolygonEditor(controller: _controller),
+              PolygonEditor(
+                controller: _controller,
+                onMarkerPress: (position, markerIndex) {
+                  _controller.removePoint(markerIndex);
+                },
+              ),
             ],
           ),
 
@@ -72,7 +78,7 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Clear button
                 FloatingActionButton(
                   heroTag: "clear",
@@ -129,8 +135,8 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
                     Text(
                       'Long press map to add point • Long press point to remove • Drag midpoints to insert',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                            color: Colors.grey[600],
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
