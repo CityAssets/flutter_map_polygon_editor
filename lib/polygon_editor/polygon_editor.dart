@@ -60,7 +60,7 @@ class PolygonEditor extends StatefulWidget {
     this.throttleDuration = const Duration(milliseconds: 16),
     this.onMarkerLongPress,
     this.onMarkerPress,
-    this.onPointsChanged,
+    this.onPointsPositionUpdated,
     super.key,
   }) : assert(
           !(onMarkerPress != null && onMarkerLongPress != null),
@@ -105,7 +105,8 @@ class PolygonEditor extends StatefulWidget {
   /// Receives tapped marker index
   final void Function(LatLng, int)? onMarkerPress;
 
-  final void Function(List<LatLng>)? onPointsChanged;
+  /// Called when point position changed or inserted new point
+  final void Function(List<LatLng>)? onPointsPositionUpdated;
 
   @override
   State<PolygonEditor> createState() => _PolygonEditorState();
@@ -166,9 +167,6 @@ class _PolygonEditorState extends State<PolygonEditor> {
       points: widget.controller.points,
       midpoints: _midpoints,
     );
-    if (widget.onPointsChanged != null) {
-      widget.onPointsChanged!(widget.controller.points);
-    }
   }
 
   /// Updates interleaved points with throttling to maintain performance during dragging.
@@ -315,6 +313,9 @@ class _PolygonEditorState extends State<PolygonEditor> {
             ? index + 1
             : (index + 1) % widget.controller.points.length;
         widget.controller.insertPoint(insertIndex, latLng);
+        if (widget.onPointsPositionUpdated != null) {
+          widget.onPointsPositionUpdated!(widget.controller.points);
+        }
       },
       builder: widget.midpointBuilder ?? defaultMidpointBuilder,
     );
@@ -363,6 +364,10 @@ class _PolygonEditorState extends State<PolygonEditor> {
       },
       onDragEnd: (details, _) {
         _showMidpoints.value = true;
+
+        if (widget.onPointsPositionUpdated != null) {
+          widget.onPointsPositionUpdated!(widget.controller.points);
+        }
       },
       builder: widget.pointBuilder ?? defaultPointBuilder,
     );

@@ -45,7 +45,7 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
                 onMarkerPress: (position, markerIndex) {
                   _controller.removePoint(markerIndex);
                 },
-                onPointsChanged: (newPointList) {
+                onPointsPositionUpdated: (newPointList) {
                   debugPrint("newPointList.length = ${newPointList.length}");
                 },
               ),
