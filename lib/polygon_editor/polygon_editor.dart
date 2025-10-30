@@ -61,6 +61,7 @@ class PolygonEditor extends StatefulWidget {
     this.onMarkerLongPress,
     this.onMarkerPress,
     this.onPointsPositionUpdated,
+    this.onlyShowMode = false,
     super.key,
   }) : assert(
           !(onMarkerPress != null && onMarkerLongPress != null),
@@ -108,6 +109,9 @@ class PolygonEditor extends StatefulWidget {
   /// Called when point position changed or inserted new point
   final void Function(List<LatLng>)? onPointsPositionUpdated;
 
+  /// Only show mode
+  final bool onlyShowMode;
+
   @override
   State<PolygonEditor> createState() => _PolygonEditorState();
 }
@@ -145,7 +149,7 @@ class _PolygonEditorState extends State<PolygonEditor> {
     return Stack(
       children: [
         _buildShapeLayer(),
-        _buildMidpointMarkers(),
+        if (!widget.onlyShowMode) _buildMidpointMarkers(),
         _buildPointMarkers(),
       ],
     );
@@ -305,10 +309,16 @@ class _PolygonEditorState extends State<PolygonEditor> {
       point: point,
       size: widget.style.midpointSize,
       onDragUpdate: (details, point) {
+        if (widget.onlyShowMode) {
+          return;
+        }
         _midpoints[index] = point;
         _throttleUpdateInterleavedPoints();
       },
       onDragEnd: (details, latLng) {
+        if (widget.onlyShowMode) {
+          return;
+        }
         final insertIndex = widget.controller.mode == PolygonEditorMode.line
             ? index + 1
             : (index + 1) % widget.controller.points.length;
@@ -346,6 +356,7 @@ class _PolygonEditorState extends State<PolygonEditor> {
         }
         widget.onMarkerLongPress!(latLng, index);
       },
+      disableDrag: widget.onlyShowMode,
       onTap: (latLng) {
         if (widget.onMarkerLongPress != null) {
           return;
@@ -357,12 +368,21 @@ class _PolygonEditorState extends State<PolygonEditor> {
         widget.onMarkerPress!(latLng, index);
       },
       onDragStart: (details, _) {
+        if (widget.onlyShowMode) {
+          return;
+        }
         _showMidpoints.value = false;
       },
       onDragUpdate: (details, point) {
+        if (widget.onlyShowMode) {
+          return;
+        }
         widget.controller.updatePoint(index, point);
       },
       onDragEnd: (details, _) {
+        if (widget.onlyShowMode) {
+          return;
+        }
         _showMidpoints.value = true;
 
         if (widget.onPointsPositionUpdated != null) {

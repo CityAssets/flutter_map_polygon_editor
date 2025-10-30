@@ -48,6 +48,7 @@ class _PolygonEditorExampleState extends State<PolygonEditorExample> {
                 onPointsPositionUpdated: (newPointList) {
                   debugPrint("newPointList.length = ${newPointList.length}");
                 },
+                onlyShowMode: true,
               ),
             ],
           ),
