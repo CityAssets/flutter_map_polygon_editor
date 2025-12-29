@@ -61,6 +61,7 @@ class PolygonEditor extends StatefulWidget {
     this.onMarkerLongPress,
     this.onMarkerPress,
     this.onPointsPositionUpdated,
+    this.onDraging,
     this.onlyShowMode = false,
     super.key,
   }) : assert(
@@ -108,6 +109,9 @@ class PolygonEditor extends StatefulWidget {
 
   /// Called when point position changed or inserted new point
   final void Function(List<LatLng>)? onPointsPositionUpdated;
+
+  /// Called when point position changing or inserting new point
+  final void Function()? onDraging;
 
   /// Only show mode
   final bool onlyShowMode;
@@ -309,6 +313,10 @@ class _PolygonEditorState extends State<PolygonEditor> {
       point: point,
       size: widget.style.midpointSize,
       onDragUpdate: (details, point) {
+        if (widget.onDraging != null) {
+          widget.onDraging!();
+        }
+
         if (widget.onlyShowMode) {
           return;
         }
@@ -371,11 +379,15 @@ class _PolygonEditorState extends State<PolygonEditor> {
         if (widget.onlyShowMode) {
           return;
         }
+
         _showMidpoints.value = false;
       },
       onDragUpdate: (details, point) {
         if (widget.onlyShowMode) {
           return;
+        }
+        if (widget.onDraging != null) {
+          widget.onDraging!();
         }
         widget.controller.updatePoint(index, point);
       },
