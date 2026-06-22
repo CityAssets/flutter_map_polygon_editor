@@ -359,10 +359,9 @@ class _PolygonEditorState extends State<PolygonEditor> {
           return;
         }
 
-        if (widget.onMarkerLongPress == null) {
-          throw Exception("Need to set onMarkerLongPress function");
+        if (widget.onMarkerLongPress != null) {
+          widget.onMarkerLongPress!(latLng, index);
         }
-        widget.onMarkerLongPress!(latLng, index);
       },
       disableDrag: widget.onlyShowMode,
       onTap: (latLng) {
@@ -370,10 +369,9 @@ class _PolygonEditorState extends State<PolygonEditor> {
           return;
         }
 
-        if (widget.onMarkerPress == null) {
-          throw Exception("Need to set onMarkerPress function");
+        if (widget.onMarkerPress != null) {
+          widget.onMarkerPress!(latLng, index);
         }
-        widget.onMarkerPress!(latLng, index);
       },
       onDragStart: (details, _) {
         if (widget.onlyShowMode) {
